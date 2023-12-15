@@ -14,7 +14,7 @@
 <ul>
     {% for task in tasks %}
     <li>
-        {{ task.title }} - {{ task.status }}<BR>
+        {{ task.title }} - {{ task.status }} от {{ task.creation_date }} до {{ task.deadline }}<BR>
         <a href="{% url 'edit_task' task_id=task.id project_id=project.id %}">Редактировать задачу</a>
         <a href="{% url 'delete_task' task_id=task.id project_id=project.id %}">Удалить задачу</a>
         <ul>
