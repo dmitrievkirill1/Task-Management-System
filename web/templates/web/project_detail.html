@@ -1,0 +1,58 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+<a href="{% url 'main' %}">На главную</a>
+<h2>{{ project.name }}</h2>
+<p>{{ project.description }}</p>
+<h3>Добавить задачу</h3>
+<form method="post" action="{% url 'add_task' project.id %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Добавить задачу</button>
+</form>
+<h3>Задачи в проекте</h3>
+<ul>
+    {% for task in tasks %}
+    <li>
+        {{ task.title }} - {{ task.status }}<BR>
+        <a href="{% url 'edit_task' task_id=task.id project_id=project.id %}">Редактировать задачу</a>
+        <a href="{% url 'delete_task' task_id=task.id project_id=project.id %}">Удалить задачу</a>
+        <ul>
+            {% if task.comments.all %}
+            <h4>Коментарии к задаче ({{ task.comments.all|length }})</h4>
+                {% for comment in task.comments.all %}
+            <li>{{ comment.text }} - {{ comment.user.username }} ({{ comment.date_added }})</li>
+            {% endfor %}
+            {% else %}
+            <li>Комментариев пока нет</li>
+            {% endif %}
+            <a href="{% url 'add_comment' task_id=task.id project_id=project.id %}">Добавить комментарий</a>
+        </ul>
+    </li><br>
+    {% endfor %}
+</ul>
+<form method="GET">
+    <b>Фильтры:</b><br>
+    {% for field in filter_form %}
+        {{ field.label }}
+        {{ field }}
+    {% endfor %}
+    <button type="submit">Найти</button>
+    <a href="?">очистить</a>
+</form>
+всего {{ total_count }} записей. {{ tasks|length }} на этой странице.
+<nav>
+    {% if tasks.has_previous %}
+        <a href="?page=1">В начало</a>
+        <a href="?page={{ tasks.previous_page_number }}">Предыдующая страница</a>
+    {% endif %}
+
+    страница {{ tasks.number }} из {{ tasks.paginator.num_pages }}
+
+    {% if tasks.has_next %}
+        <a href="?page={{ tasks.next_page_number }}">Следующая страница</a>
+        <a href="?page={{ tasks.paginator.num_pages }}">В конец</a>
+    {% endif %}
+</nav>
+<hr>
+{% endblock %}

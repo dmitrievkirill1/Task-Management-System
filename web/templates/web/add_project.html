@@ -1,0 +1,12 @@
+<!-- templates/projects/add_project.html -->
+
+{% extends 'web/base.html' %}
+
+{% block content %}
+  <h2>Добавить новый проект</h2>
+  <form method="post" action="{% url 'add_project' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Создать проект</button>
+  </form>
+{% endblock %}
