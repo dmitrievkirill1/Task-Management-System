@@ -1,0 +1,12 @@
+<!-- templates/web/add_task.html -->
+{% extends 'web/base.html' %}
+
+{% block content %}
+  <a href="{% url 'main' %}">На главную</a>
+  <h2>Добавить задачу в проект "{{ project.name }}"</h2>
+  <form method="post" action="{% url 'add_task' project.id %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Добавить задачу</button>
+  </form>
+{% endblock %}

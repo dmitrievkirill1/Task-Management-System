@@ -2,5 +2,20 @@
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
+<h1>Проекты</h1>
 
+<a href="{% url 'add_project' %}">Добавить новый проект</a>
+   <ul>
+       {% if projects %}
+       {% for project in projects %}
+       <li>
+           <a href="{% url 'project_detail' project_id=project.id %}"><h3> Проект {{project.name}}</h3></a>
+           <a href="{% url 'edit_project' project.id %}">Редактировать проект</a>
+           <a href="{% url 'delete_project' project.id %}">Удалить проект</a>
+       </li><br>
+       {% endfor %}
+       {% else %} <p>Проектов нет!</p>
+       {% endif %}
+
+   </ul>
 {% endblock %}

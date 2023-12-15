@@ -1,0 +1,12 @@
+<!-- templates/web/edit_project.html -->
+{% extends 'web/base.html' %}
+
+{% block content %}
+  <a href="{% url 'main' %}">На главную</a>
+  <h2>Редактировать проект</h2>
+  <form method="post" action="{% url 'edit_project' project.id %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Сохранить изменения</button>
+  </form>
+{% endblock %}
