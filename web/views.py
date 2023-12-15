@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model, login, authenticate, logout
 from django.core.paginator import Paginator
-from django.db.models import Subquery, OuterRef, Prefetch, Count
+from django.db.models import Prefetch, Count
 from django.shortcuts import render, redirect, get_object_or_404
 
 from web.forms import RegistrationForm, AuthForm, ProjectForm, TaskForm, CommentForm, TaskFilterForm
@@ -23,14 +23,12 @@ def register_view(request):
     if request.method == 'POST':
         form = RegistrationForm(data=request.POST)
         if form.is_valid():
-            user = User(
+            user = User.objects.create_user(
                 username=form.cleaned_data['username'],
                 email=form.cleaned_data['email'],
+                password=form.cleaned_data['password'],
             )
-            user.set_password(form.cleaned_data['password'])
-            user.save()
             login(request, user)
-
             return redirect('main')
 
     return render(request, 'web/registration.html', {'form': form})
@@ -42,12 +40,11 @@ def login_view(request):
         form = AuthForm(data=request.POST)
         if form.is_valid():
             user = authenticate(**form.cleaned_data)
-            if user is None:
-                form.add_error(None, 'Введены неверные данные')
-            else:
+            if user is not None:
                 login(request, user)
-
                 return redirect('main')
+            else:
+                form.add_error(None, 'Введены неверные данные')
 
     return render(request, 'web/login.html', {'form': form})
 
@@ -58,25 +55,25 @@ def logout_view(request):
 
 
 def project_detail(request, project_id):
-    project = get_object_or_404(Project, pk=project_id)
+    project = get_object_or_404(
+        Project.objects.select_related('owner').annotate(total_comments=Count('tasks__comments')), pk=project_id)
 
-    # Получаем все задачи с присоединенными комментариями
     tasks = Task.objects.filter(project=project).prefetch_related(
         Prefetch('comments', queryset=Comment.objects.all().order_by('-date_added'))
     ).annotate(
         has_comments=Count('comments'),
-    )
-    filter_form = TaskFilterForm(request.GET)
-    filter_form.is_valid()
-    filters = filter_form.cleaned_data
+    ).order_by('-creation_date')
 
-    if filters['search']:
-        tasks = tasks.filter(title__icontains=filters['search'])
-    if filters['is_comment'] is not None:
-        if filters['is_comment']:
-            tasks = tasks.filter(has_comments__gt=0)
-        else:
-            tasks = tasks.filter(has_comments=0)
+    if request.method == 'GET':
+        filter_form = TaskFilterForm(request.GET)
+        if filter_form.is_valid():
+            filters = filter_form.cleaned_data
+            if filters['search']:
+                tasks = tasks.filter(title__icontains=filters['search'])
+            if filters['is_comment'] is not None:
+                tasks = tasks.filter(has_comments__gt=0) if filters['is_comment'] else tasks.filter(has_comments=0)
+    else:
+        filter_form = TaskFilterForm()
 
     total_count = tasks.count()
     page_number = request.GET.get('page', 1)
