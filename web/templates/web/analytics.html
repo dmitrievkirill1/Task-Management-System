@@ -1,0 +1,18 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+    <h2>Аналитика</h2>
+<p>
+    Всего <b>{{overall_statt.count}}</b> задач.
+    Максимальная дата {{ overall_statt.max_date }}
+    Минимальная дата {{ overall_statt.min_date }}
+</p>
+
+<b>Статистика по дням</b>
+<ul>
+    {% for day_stat in days_stat %}
+    <li>От <b>{{ day_stat.start_date|date:"d.m.Y" }}</b> До <b>{{ day_stat.date|date:"d.m.Y"  }}</b>
+        - {{ day_stat.task_count }} задач, {{ day_stat.comment_count }} с комментариями.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

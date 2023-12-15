@@ -1,10 +1,11 @@
 from django.urls import path
 from web.views import index, register_view, login_view, logout_view, project_detail, add_project, add_task, \
-    edit_project, delete_project, edit_task, delete_task, add_comment
+    edit_project, delete_project, edit_task, delete_task, add_comment, analytics_view
 
 urlpatterns = [
     path('', index, name="main"),
     path('register/', register_view, name='registration'),
+    path('analytics/', analytics_view, name='analytics'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     path('projects/<int:project_id>/', project_detail, name='project_detail'),

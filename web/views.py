@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model, login, authenticate, logout
 from django.core.paginator import Paginator
-from django.db.models import Prefetch, Count
+from django.db.models import Prefetch, Count, Max, Min
+from django.db.models.functions import TruncDate
 from django.shortcuts import render, redirect, get_object_or_404
 
 from web.forms import RegistrationForm, AuthForm, ProjectForm, TaskForm, CommentForm, TaskFilterForm
@@ -182,3 +183,25 @@ def add_comment(request, project_id, task_id):
         form = CommentForm()
 
     return render(request, 'web/add_comment.html', {'form': form, 'project': project, 'task': task})
+
+
+def analytics_view(request):
+    overall_statt = Task.objects.aggregate(
+        count=Count("id"),
+        max_date=Max("deadline"),
+        min_date=Min("creation_date")
+    )
+    days_stat = (
+        Task.objects.all()
+        .annotate(date=TruncDate("deadline"))
+        .values("date")
+        .annotate(
+            task_count=Count("id"),
+            comment_count=Count("comments", distinct=True),
+            start_date=Min("creation_date")
+        )
+    )
+    return render(request, 'web/analytics.html', {
+        'overall_statt': overall_statt,
+        'days_stat': days_stat
+    })
