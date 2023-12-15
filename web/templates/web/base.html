@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} </title>
+</head>
+<body>
+<header>
+    <div>
+        <div>
+            <h1><a href="{% url 'main' %}">TaskManagment</a></h1>
+        </div>
+        <div>
+            {% if user.is_active %}
+            <p>Вы авторизованы как <b>{{ user.username }}</b><a href="{% url 'logout' %}">Выйти</a></p>
+            {% else %}
+            <a href="{% url 'registration' %}">Зарегистрироваться</a>
+            <a href="{% url 'login' %}">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+    <hr>
+</header>
+    <div class="main">
+        {% block content %} {% endblock %}
+    </div>
+</body>
+</html>
